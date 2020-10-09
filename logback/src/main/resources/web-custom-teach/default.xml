@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<included>
+
+  <!--
+   自定义日志配置基建，包含内容：
+   1、根据不同的日志级别的不同日志格式，定义4个 ConsoleAppender
+   2、定义好较高性能的异步 FileAppender
+   3、参考 Springboot、BladeX-Boot 框架的日志设计，将基础的同时也是常用的配置提供到下方
+   -->
+
+  <!-- 获取 springboot 的配置项（用于文件日志输出的位置） -->
+  <springProperty scope="context" name="ENV" source="spring.profiles.active"/>
+  <!-- 当然可以通过程序代码的形式进行配置 -->
+  <contextListener class="priv.wmc.log.logback.init.LoggerStartupListener"/>
+
+  <!-- 设置上下文名称
+        每个logger都关联到logger上下文，默认上下文名称为“default”
+        但可以使用设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改
+    -->
+  <contextName>core</contextName>
+
+  <!-- 引入 springboot 自定义转换符实现 -->
+  <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+  <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+  <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+
+  <!-- 配置项：日志输出级别 -->
+  <property name="LOG_OUTPUT_LEVEL" value="DEBUG"/>
+
+  <!-- 配置项：不同级别的控制台日志输出格式 -->
+  <property name="DEBUG_CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5p) %magenta(${PID:- }) --- [%15.15t] %cyan(%-40.40logger{39} %4line) : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+  <property name="INFO_CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5p) %magenta(${PID:- }) --- [%15.15t] %cyan(%-40.40logger{39} %4line) : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+  <property name="WARN_CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%-5p) %magenta(${PID:- }) --- [%15.15t] %cyan(%-40.40logger{39} %4line) : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+  <property name="ERROR_CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%5p) %magenta(${PID:- }) --- [%15.15t] %cyan(%-40.40logger{39} %4line) : %clr(%m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx})"/>
+
+  <!-- 配置项：文件日志输出位置等管理配置 -->
+  <property name="LOG_FILE" value="target/logs/${ENV}/today.log" />
+
+  <property name="FILE_LOG_PATTERN" value="%date [%level] [%thread] %logger{60} [%file : %line] %msg%n"/>
+  <property name="LOG_FILE_CLEAN_HISTORY_ON_START" value="false"/>
+  <!-- 日志命名:单个文件大于2MB 按照时间+自增i 生成log文件（以".gz"会启用压缩） -->
+  <property name="ROLLING_FILE_NAME_PATTERN" value="${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz}"/>
+  <property name="LOG_FILE_MAX_SIZE" value="10MB"/>
+  <property name="LOG_FILE_MAX_HISTORY" value="7"/>
+  <property name="LOG_FILE_TOTAL_SIZE_CAP" value="0"/>
+
+  <!-- 不丢失日志（默认队列达到80%，会开始丢弃日志，按照TRACE、DEBUG、INFO的优先级） -->
+  <property name="ASYNC_FILE_DISCARDING_THRESHOLD" value="0"/>
+  <!-- 队列长度，默认256（会影响性能） -->
+  <property name="ASYNC_FILE_QUEUE_SIZE" value="256"/>
+
+  <!-- 实际引入定义的 ConsoleAppender 和 FileAppender -->
+  <include resource="web-custom-teach/console-appender.xml" />
+  <include resource="web-custom-teach/file-appender.xml" />
+
+  <!-- 定义指定包下的日志输出级别（以 swagger 为例） -->
+  <logger name="springfox.documentation.spring.web" level="ERROR" />
+
+  <!-- 实际注册  ConsoleAppender 和 FileAppender 让其生效 -->
+  <root level="${LOG_OUTPUT_LEVEL}">
+    <appender-ref ref="DEBUG_CONSOLE"/>
+    <appender-ref ref="INFO_CONSOLE"/>
+    <appender-ref ref="WARN_CONSOLE"/>
+    <appender-ref ref="ERROR_CONSOLE"/>
+
+    <appender-ref ref="ASYNC-FILE"/>
+  </root>
+</included>

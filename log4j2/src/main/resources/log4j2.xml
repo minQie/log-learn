@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- log4j2框架自身运行的日志输出 -->
+<configuration status="WARN" monitorInterval="600">
+
+  <Properties>
+    <Property name="LOG_FILE">log4j2/target/log/info.log</Property>
+    <Property name="LOG_FILE2">log4j2/target/log/info/info - %d{yyyy-MM-dd HH_mm_ss}.log.gz</Property>
+  </Properties>
+
+  <Appenders>
+    <!-- 控制台输出 -->
+    <Console name="CONSOLE" target="SYSTEM_OUT">
+      <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+      <PatternLayout pattern="%5p [%t] %d{yyyy-MM-dd HH:mm:ss} (%F:%L) %m%n" />
+    </Console>
+
+    <!-- 文件输出 -->
+    <RollingFile name="FILE" immediateFlush="true" fileName="${LOG_FILE}" filePattern="${LOG_FILE2}">
+      <PatternLayout>
+        <pattern>%5p [%t] %d{yyyy-MM-dd HH:mm:ss} (%F:%L) %m%n</pattern>
+      </PatternLayout>
+      <Policies>
+        <!-- 每个日志文件最大2MB -->
+        <SizeBasedTriggeringPolicy size="2MB" />
+      </Policies>
+      <Filters>
+        <!-- 此Filter意思是，只输出INFO级别的数据
+            DENY，日志将立即被抛弃不再经过其他过滤器
+            NEUTRAL，有序列表里的下个过滤器过接着处理日志
+            ACCEPT，日志会被立即处理，不再经过剩余过滤器
+         -->
+        <ThresholdFilter level="warn" onMatch="DENY" onMismatch="NEUTRAL" />
+        <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" />
+      </Filters>
+    </RollingFile>
+  </Appenders>
+
+  <Loggers>
+    <root>
+      <appender-ref ref="CONSOLE"/>
+      <appender-ref ref="FILE"/>
+    </root>
+  </Loggers>
+
+</configuration>

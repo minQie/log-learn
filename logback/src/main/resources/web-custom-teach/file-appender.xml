@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<included>
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <File>${LOG_FILE}</File>
+    <encoder>
+      <pattern>${FILE_LOG_PATTERN}</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <cleanHistoryOnStart>${LOG_FILE_CLEAN_HISTORY_ON_START:-false}</cleanHistoryOnStart>
+      <fileNamePattern>${ROLLING_FILE_NAME_PATTERN:-${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz}</fileNamePattern>
+      <maxFileSize>${LOG_FILE_MAX_SIZE:-10MB}</maxFileSize>
+      <maxHistory>${LOG_FILE_MAX_HISTORY:-7}</maxHistory>
+      <totalSizeCap>${LOG_FILE_TOTAL_SIZE_CAP:-0}</totalSizeCap>
+    </rollingPolicy>
+  </appender>
+
+  <appender name="ASYNC-FILE" class="ch.qos.logback.classic.AsyncAppender">
+    <discardingThreshold>${ASYNC_FILE_DISCARDING_THRESHOLD:-0}</discardingThreshold>
+    <queueSize>${ASYNC_FILE_QUEUE_SIZE:-256}</queueSize>
+    <appender-ref ref="FILE"/>
+  </appender>
+</included>
